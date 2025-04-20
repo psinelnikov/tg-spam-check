@@ -38,16 +38,13 @@ agent = Agent(
 
 # Utilities
 
+def store_message_in_vector_store(message_text):
+    chunks = chunk_text(message_text, overlap_percent=0.2)
+    agent.store.save_docs(chunks)
+
 async def print_milvus_contents(update: Update, context: CallbackContext) -> None:
     results = agent.store.search(" ".join(context.args))
     await context.bot.send_message(chat_id=update.effective_chat.id, text=str(results))
-
-def store_message_in_vector_store(message_text):
-    """
-    Embeds and stores a single message into the Milvus vector store for RAG retrieval.
-    """
-    chunks = chunk_text(message_text, overlap_percent=0.2)
-    agent.store.save_docs(chunks)
 
 async def process_message(message_text, context: CallbackContext) -> None:
     response = agent.prompt(message_text)
@@ -82,7 +79,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
 
     # Only process if there is text/caption
     if message_text:
-        await store_message_in_vector_store(message_text)
+        store_message_in_vector_store(message_text)
         await context.bot.send_message(chat_id=ADMIN_TELEGRAM_USER_ID, text=f"\"{message_text}\" is stored.")
 
 async def handle_group_message(update: Update, context: CallbackContext) -> None:
@@ -104,8 +101,7 @@ async def handle_group_message(update: Update, context: CallbackContext) -> None
         return
 
     # Search for the message in the store
-    store = MilvusStore()
-    results = store.search(message_text, 3, 0.8) # 3 results, 0.8 similarity
+    results = agent.store.search(message_text, 3, 0.8)
     if results:
         # If there is a match, forward to agent
         await process_message(message_text, context)
