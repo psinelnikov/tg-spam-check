@@ -4,17 +4,12 @@ This is a Telegram bot that uses Alith to detect spam messages in a Telegram gro
 
 ## Setup
 
-1. Install dependencies:
-```bash
-uv install
-```
-
-2. Set up environment variables:
+1. Set up environment variables:
 ```bash
 cp example.env .env
 ```
 
-3. Run the bot:
+2. Run the bot:
 ```bash
 uv run main.py
 ```
